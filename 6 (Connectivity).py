@@ -62,6 +62,10 @@ if __name__ == "__main__":
 # pip3 install mysql-connector-python
 
 '''
+sudo mysql -u root -p
+CREATE DATABASE sample_db;
+USE sample_db;
+
 CREATE TABLE students (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100),
