@@ -1,14 +1,32 @@
 Step 1 : CREATE DATABASE
 
+CREATE DATABASE IF NOT EXISTS P;
+
+
+USE P;
+
 CREATE TABLE IF NOT EXISTS N_Roll_Call (
     student_id INT,
-    roll_date DATE
+    student_name VARCHAR(100),
+    PRIMARY KEY (student_id)
 );
 
 CREATE TABLE IF NOT EXISTS O_Roll_Call (
     student_id INT,
-    roll_date DATE
+    student_name VARCHAR(100),
+    PRIMARY KEY (student_id)
 );
+
+
+
+INSERT INTO N_Roll_Call (student_id, student_name) VALUES
+(101, 'AMAN'),
+(102, 'Rushabh'),
+(103, 'Zaid'),
+(104, 'Asad'),
+(105, 'Ayan');
+
+
 
 
 Step 2: Run he gicen commands
@@ -18,46 +36,39 @@ DELIMITER //
 CREATE PROCEDURE MergeRollCall()
 BEGIN
     DECLARE v_student_id INT;
-    DECLARE v_roll_date DATE;
+    DECLARE v_student_name VARCHAR(100);
     DECLARE done INT DEFAULT FALSE;
 
-
     DECLARE roll_call_cursor CURSOR FOR
-        SELECT student_id, roll_date FROM N_Roll_Call;
+        SELECT student_id, student_name FROM N_Roll_Call;
 
- 
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
-
 
     OPEN roll_call_cursor;
 
     read_loop: LOOP
-       
-        FETCH roll_call_cursor INTO v_student_id, v_roll_date;
+        FETCH roll_call_cursor INTO v_student_id, v_student_name;
 
-      
         IF done THEN
             LEAVE read_loop;
         END IF;
 
-      
         IF NOT EXISTS (
             SELECT 1 FROM O_Roll_Call
-            WHERE student_id = v_student_id AND roll_date = v_roll_date
+            WHERE student_id = v_student_id AND student_name = v_student_name
         ) THEN
-            INSERT INTO O_Roll_Call (student_id, roll_date)
-            VALUES (v_student_id, v_roll_date);
+            INSERT INTO O_Roll_Call (student_id, student_name)
+            VALUES (v_student_id, v_student_name);
         END IF;
-
     END LOOP;
 
     CLOSE roll_call_cursor;
 
-  
     COMMIT;
 END //
 
 DELIMITER ;
+
 
 
 
@@ -65,54 +76,57 @@ DELIMITER ;
 
 COMMENTS //////
 
+
+-- Step 2: Create the stored procedure
 DELIMITER //
 
 CREATE PROCEDURE MergeRollCall()
 BEGIN
     DECLARE v_student_id INT;
-    DECLARE v_roll_date DATE;
+    DECLARE v_student_name VARCHAR(100);
     DECLARE done INT DEFAULT FALSE;
 
-    -- Declare cursor
+    -- Declare cursor to fetch data from N_Roll_Call
     DECLARE roll_call_cursor CURSOR FOR
-        SELECT student_id, roll_date FROM N_Roll_Call;
+        SELECT student_id, student_name FROM N_Roll_Call;
 
-    -- Declare handler to set done flag
+    -- Handler for when the cursor finishes reading
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
 
-    -- Open cursor
+    -- Open the cursor to begin processing
     OPEN roll_call_cursor;
 
+    -- Loop through the records in N_Roll_Call
     read_loop: LOOP
-        -- Fetch data into variables
-        FETCH roll_call_cursor INTO v_student_id, v_roll_date;
+       
+        -- Fetch student_id and student_name from cursor
+        FETCH roll_call_cursor INTO v_student_id, v_student_name;
 
-        -- Exit loop if no more data
+        -- If done, exit the loop
         IF done THEN
             LEAVE read_loop;
         END IF;
 
-        -- Check if the record exists in O_Roll_Call and insert if it does not
+        -- Check if the student already exists in O_Roll_Call
         IF NOT EXISTS (
             SELECT 1 FROM O_Roll_Call
-            WHERE student_id = v_student_id AND roll_date = v_roll_date
+            WHERE student_id = v_student_id AND student_name = v_student_name
         ) THEN
-            INSERT INTO O_Roll_Call (student_id, roll_date)
-            VALUES (v_student_id, v_roll_date);
+            -- If not, insert the missing student data into O_Roll_Call
+            INSERT INTO O_Roll_Call (student_id, student_name)
+            VALUES (v_student_id, v_student_name);
         END IF;
 
     END LOOP;
 
-    -- Close cursor
+    -- Close the cursor
     CLOSE roll_call_cursor;
 
-    -- Commit transaction
+    -- Commit the transaction
     COMMIT;
 END //
 
 DELIMITER ;
-
-
 
 
 
