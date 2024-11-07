@@ -58,7 +58,9 @@ END //
 DELIMITER ;
 
 
+CALL MergeRollCall();
 
+SELECT * FROM O_Roll_Call;
 
 
 
