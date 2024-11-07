@@ -1,9 +1,6 @@
-Step 1 : CREATE DATABASE
+CREATE DATABASE IF NOT EXISTS K;
 
-CREATE DATABASE IF NOT EXISTS P;
-
-
-USE P;
+USE K;
 
 CREATE TABLE IF NOT EXISTS N_Roll_Call (
     student_id INT,
@@ -17,19 +14,12 @@ CREATE TABLE IF NOT EXISTS O_Roll_Call (
     PRIMARY KEY (student_id)
 );
 
-
-
 INSERT INTO N_Roll_Call (student_id, student_name) VALUES
 (101, 'AMAN'),
 (102, 'Rushabh'),
 (103, 'Zaid'),
 (104, 'Asad'),
 (105, 'Ayan');
-
-
-
-
-Step 2: Run he gicen commands
 
 DELIMITER //
 
@@ -55,7 +45,7 @@ BEGIN
 
         IF NOT EXISTS (
             SELECT 1 FROM O_Roll_Call
-            WHERE student_id = v_student_id AND student_name = v_student_name
+            WHERE student_id = v_student_id
         ) THEN
             INSERT INTO O_Roll_Call (student_id, student_name)
             VALUES (v_student_id, v_student_name);
@@ -63,11 +53,43 @@ BEGIN
     END LOOP;
 
     CLOSE roll_call_cursor;
-
-    COMMIT;
 END //
 
 DELIMITER ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
