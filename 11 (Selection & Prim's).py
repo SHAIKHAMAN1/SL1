@@ -34,8 +34,8 @@ def prim_mst(graph, nodes):
 
         if u != -1 and v != -1:
             selected[nodes[v]] = True
-            mst_matrix[u][v] = graph[nodes[u]][nodes[v]]
-            mst_matrix[v][u] = graph[nodes[v]][nodes[u]]
+            mst_matrix[u][v] = min_edge
+            mst_matrix[v][u] = min_edge
             mst_edges.append((nodes[u], nodes[v], min_edge))  # Add edge to the MST
             total_weight += min_edge  # Add edge weight to the total weight
             num_edges += 1
@@ -80,7 +80,7 @@ def prim_menu():
     num_nodes = int(input("Enter the number of nodes: "))
     nodes = [input(f"Enter name for node {i+1}: ").strip() for i in range(num_nodes)]
     
-    graph = {node: {node: 0 for node in nodes} for node in nodes}  # Initialize the graph with 0 weights
+    graph = {node: {other_node: 0 for other_node in nodes} for node in nodes}  # Initialize the graph with 0 weights
 
     print("\nEnter the edges (e.g., A B 4 for edge A-B with weight 4):")
     num_edges = int(input("Enter the number of edges: "))
