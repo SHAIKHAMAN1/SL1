@@ -14,17 +14,33 @@ CREATE TABLE Fine (
 );
 
 
+INSERT INTO Borrower (Roll_no, Name_of_Book, Date_of_Issue, Status)
+VALUES
+(101, 'Harry Potter', '2024-11-01', 'I'),
+(102, 'The Prophet', '2024-11-01', 'I'),
+(103, 'Act Don''t Talk', '2024-10-15', 'I'),
+(104, 'Ikigai', '2024-05-10', 'I'),
+(105, 'The Alchemist', '2024-06-01', 'I');
+
+INSERT INTO Fine (Roll_no, Date, Amt) 
+VALUES
+(101, '2024-09-10', 50.00),
+(102, '2024-09-15', 30.00);
+
+
+
 2.EXECUTE GIVEN COMMAND
+
 
 DELIMITER $$
 
-CREATE PROCEDURE CalculateFineAndUpdateStatus(IN p_roll_no INT, IN p_name_of_book VARCHAR(100))
+CREATE PROCEDURE CalcFine(IN p_roll_no INT, IN p_name_of_book VARCHAR(100))
 BEGIN
     DECLARE v_date_of_issue DATE;
     DECLARE v_days_overdue INT;
     DECLARE v_fine_amount DECIMAL(10, 2) DEFAULT 0;
 
-       SELECT Date_of_Issue INTO v_date_of_issue
+    SELECT Date_of_Issue INTO v_date_of_issue
     FROM Borrower
     WHERE Roll_no = p_roll_no AND Name_of_Book = p_name_of_book
     LIMIT 1;
@@ -33,10 +49,8 @@ BEGIN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'No record found for the given Roll_no and Book name.';
     END IF;
 
-
     SET v_days_overdue = DATEDIFF(CURRENT_DATE, v_date_of_issue);
 
-    
     IF v_days_overdue > 30 THEN
         SET v_fine_amount = (v_days_overdue - 30) * 50 + (30 * 5);
     ELSEIF v_days_overdue >= 15 THEN
@@ -45,27 +59,23 @@ BEGIN
         SET v_fine_amount = 0; -- No fine for days less than 15
     END IF;
 
-
     IF v_fine_amount > 0 THEN
         INSERT INTO Fine (Roll_no, Date, Amt)
         VALUES (p_roll_no, CURRENT_DATE, v_fine_amount);
     END IF;
 
-
     UPDATE Borrower
     SET Status = 'R'
     WHERE Roll_no = p_roll_no AND Name_of_Book = p_name_of_book;
 
- 
     COMMIT;
-
-  END $$
+END $$
 
 DELIMITER ;
 
 
 
-
+CALL CalcFine(101, 'Harry Potter');
 
 
 
