@@ -1,10 +1,12 @@
-1. CREATE DATABASE 
+CREATE DATABASE IF NOT EXISTS Library;
+
+USE Library;
 
 CREATE TABLE Borrower (
     Roll_no INT PRIMARY KEY,
     Name_of_Book VARCHAR(100),
     Date_of_Issue DATE,
-    Status CHAR(1) -- 'I' for Issued, 'R' for Returned
+    Status CHAR(1)
 );
 
 CREATE TABLE Fine (
@@ -12,7 +14,6 @@ CREATE TABLE Fine (
     Date DATE,
     Amt DECIMAL(10, 2)
 );
-
 
 INSERT INTO Borrower (Roll_no, Name_of_Book, Date_of_Issue, Status)
 VALUES
@@ -26,11 +27,6 @@ INSERT INTO Fine (Roll_no, Date, Amt)
 VALUES
 (101, '2024-09-10', 50.00),
 (102, '2024-09-15', 30.00);
-
-
-
-2.EXECUTE GIVEN COMMAND
-
 
 DELIMITER $$
 
@@ -56,7 +52,7 @@ BEGIN
     ELSEIF v_days_overdue >= 15 THEN
         SET v_fine_amount = v_days_overdue * 5;
     ELSE
-        SET v_fine_amount = 0; -- No fine for days less than 15
+        SET v_fine_amount = 0;
     END IF;
 
     IF v_fine_amount > 0 THEN
@@ -68,76 +64,8 @@ BEGIN
     SET Status = 'R'
     WHERE Roll_no = p_roll_no AND Name_of_Book = p_name_of_book;
 
-    COMMIT;
 END $$
 
 DELIMITER ;
-
-
 
 CALL CalcFine(101, 'Harry Potter');
-
-
-
-
-
-
-
-
-
-
-
-
-
-DELIMITER $$
-
-CREATE PROCEDURE CalculateFineAndUpdateStatus(IN p_roll_no INT, IN p_name_of_book VARCHAR(100))
-BEGIN
-    DECLARE v_date_of_issue DATE;
-    DECLARE v_days_overdue INT;
-    DECLARE v_fine_amount DECIMAL(10, 2) DEFAULT 0;
-
-    -- Retrieve the Date_of_Issue from Borrower table
-    SELECT Date_of_Issue INTO v_date_of_issue
-    FROM Borrower
-    WHERE Roll_no = p_roll_no AND Name_of_Book = p_name_of_book
-    LIMIT 1;
-
-    -- Check if no record was found
-    IF v_date_of_issue IS NULL THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'No record found for the given Roll_no and Book name.';
-    END IF;
-
-    -- Calculate the number of days overdue
-    SET v_days_overdue = DATEDIFF(CURRENT_DATE, v_date_of_issue);
-
-    -- Determine the fine amount based on overdue days
-    IF v_days_overdue > 30 THEN
-        SET v_fine_amount = (v_days_overdue - 30) * 50 + (30 * 5);
-    ELSEIF v_days_overdue >= 15 THEN
-        SET v_fine_amount = v_days_overdue * 5;
-    ELSE
-        SET v_fine_amount = 0; -- No fine for days less than 15
-    END IF;
-
-    -- If there is a fine, insert it into the Fine table
-    IF v_fine_amount > 0 THEN
-        INSERT INTO Fine (Roll_no, Date, Amt)
-        VALUES (p_roll_no, CURRENT_DATE, v_fine_amount);
-    END IF;
-
-    -- Update the Borrower table to change Status from 'I' to 'R' (Returned)
-    UPDATE Borrower
-    SET Status = 'R'
-    WHERE Roll_no = p_roll_no AND Name_of_Book = p_name_of_book;
-
-    -- Commit changes
-    COMMIT;
-
-    -- Output the result
-    SELECT 'Fine calculated and status updated successfully.' AS Message;
-
-END $$
-
-DELIMITER ;
-
