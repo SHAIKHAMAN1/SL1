@@ -61,6 +61,12 @@ if __name__ == "__main__":
 
 # pip3 install mysql-connector-python
 
+sudo apt update
+sudo apt install python3-pip
+pip3 install mysql-connector-python
+python3 -c "import mysql.connector; print(mysql.connector.__version__)"
+
+
 '''
 sudo mysql -u root -p
 CREATE DATABASE sample_db;
